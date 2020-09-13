@@ -1,2 +1,2 @@
 #Fixed and Random Effects Model
-In R
+In R and STATA
