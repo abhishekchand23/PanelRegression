@@ -1,9 +1,10 @@
-import excel "scho_data_new.xlsx" ,sheet("Sheet2") firstrow
+import excel "scho_data_new.xlsx" ,sheet("Sheet3") firstrow
 
 summarize
 describe
 
 twoway scatter Enrolment Scholarship || lfit Enrolment Scholarship 
+graph save Enrolment_ST_ols
 
 encode DISTRICT , gen(DISTRICT1)
 xtset DISTRICT1 YEAR 
@@ -11,13 +12,17 @@ xtline Enrolment
 
 gen log_enrolment = log(Enrolment)
 xtline log_enrolment
+graph save Enrolment_ST
 xtline log_enrolment, overlay
+graph save Enrolment_ST_Overlay
 
 bysort DISTRICT1 :egen Enrolment_mean = mean(Enrolment)
 twoway scatter Enrolment DISTRICT1 , msymbol(circle_hollow) || connected Enrolment_mean DISTRICT1 , msymbol(diamond)|| , xlabel(1 "Almora" 2 "Bageshwar" 3 "Chamoli" 4 "Champawat" 5 "DehraDun" 6 "Haridwar" 7 "Nainital" 8 "Pauri" 9 "Pithoragarh" 10 "Rudraprayag" 11 "Tehri" 12 "USN" 13 "Uttarkashi")
+graph save Enrolment_ST_het_dist
 
 bysort YEAR  :egen Enrolment_mean_Y = mean(Enrolment)
 twoway scatter Enrolment YEAR  , msymbol(circle_hollow) || connected Enrolment_mean_Y YEAR , msymbol(diamond)|| , xlabel(2013(1) 2017)
+graph save Enrolment_ST_het_year
 
  regress Enrolment Scholarship 
  estimates store ols

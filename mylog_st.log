@@ -1,0 +1,664 @@
+----------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/abhishekchand/tmp/fixedrandom/mylog_st.log
+  log type:  text
+ opened on:  13 Sep 2020, 16:58:41
+
+. do "/var/folders/96/gm_sv_656mdb9_lm7r2_k2jh0000gn/T//SD28547.000000"
+
+. import excel "scho_data_new.xlsx" ,sheet("Sheet3") firstrow
+
+. 
+. summarize
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+    DISTRICT |          0
+        YEAR |         65        2015    1.425219       2013       2017
+   Enrolment |         65    3759.246    6629.339         39      20154
+ Scholarship |         65      19.262    53.59741          0     260.04
+Dist_perca~c |         65    100121.2    43608.52      59927     241013
+-------------+---------------------------------------------------------
+    Altitude |         65    1242.154    593.7808        244       2084
+ st_pop_perc |         65    23495.45    42905.55        223     130727
+
+. describe
+
+Contains data
+  obs:            65                          
+ vars:             7                          
+ size:         2,145                          
+----------------------------------------------------------------------------------
+              storage   display    value
+variable name   type    format     label      variable label
+----------------------------------------------------------------------------------
+DISTRICT        str11   %11s                  DISTRICT
+YEAR            int     %10.0g                YEAR
+Enrolment       int     %10.0g                Enrolment
+Scholarship     double  %10.0g                Scholarship
+Dist_percap_inc long    %10.0g                Dist_percap_inc
+Altitude        int     %10.0g                Altitude
+st_pop_perc     long    %10.0g                st_pop_perc
+----------------------------------------------------------------------------------
+Sorted by: 
+     Note: Dataset has changed since last saved.
+
+. 
+. twoway scatter Enrolment Scholarship || lfit Enrolment Scholarship 
+
+. graph save Enrolment_ST_ols
+(file Enrolment_ST_ols.gph saved)
+
+. 
+. encode DISTRICT , gen(DISTRICT1)
+
+. xtset DISTRICT1 YEAR 
+       panel variable:  DISTRICT1 (strongly balanced)
+        time variable:  YEAR, 2013 to 2017
+                delta:  1 unit
+
+. xtline Enrolment
+
+. 
+. gen log_enrolment = log(Enrolment)
+
+. xtline log_enrolment
+
+. graph save Enrolment_ST
+(file Enrolment_ST.gph saved)
+
+. xtline log_enrolment, overlay
+
+. graph save Enrolment_ST_Overlay
+(file Enrolment_ST_Overlay.gph saved)
+
+. 
+. bysort DISTRICT1 :egen Enrolment_mean = mean(Enrolment)
+
+. twoway scatter Enrolment DISTRICT1 , msymbol(circle_hollow) || connected Enrolme
+> nt_mean DISTRICT1 , msymbol(diamond)|| , xlabel(1 "Almora" 2 "Bageshwar" 3 "Cham
+> oli" 4 "Champawat" 5 "DehraDun" 6 "Haridwar" 7 "Nainital" 8 "Pauri" 9 "Pithoraga
+> rh" 10 "Rudraprayag" 11 "Tehri" 12 "USN" 13 "Uttarkashi")
+
+. graph save Enrolment_ST_het_dist
+(file Enrolment_ST_het_dist.gph saved)
+
+. 
+. bysort YEAR  :egen Enrolment_mean_Y = mean(Enrolment)
+
+. twoway scatter Enrolment YEAR  , msymbol(circle_hollow) || connected Enrolment_m
+> ean_Y YEAR , msymbol(diamond)|| , xlabel(2013(1) 2017)
+
+. graph save Enrolment_ST_het_year
+(file Enrolment_ST_het_year.gph saved)
+
+. 
+.  regress Enrolment Scholarship 
+
+      Source |       SS           df       MS      Number of obs   =        65
+-------------+----------------------------------   F(1, 63)        =     92.56
+       Model |  1.6735e+09         1  1.6735e+09   Prob > F        =    0.0000
+    Residual |  1.1391e+09        63    18081561   R-squared       =    0.5950
+-------------+----------------------------------   Adj R-squared   =    0.5886
+       Total |  2.8127e+09        64  43948131.2   Root MSE        =    4252.2
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   95.40794   9.917088     9.62   0.000     75.59022    115.2257
+       _cons |   1921.498   560.9524     3.43   0.001     800.5244    3042.472
+------------------------------------------------------------------------------
+
+.  estimates store ols
+
+.  
+.  xi: regress Enrolment  Scholarship  i.DISTRICT
+i.DISTRICT        _IDISTRICT_1-13     (_IDISTRICT_1 for DIST~T==Almora omitted)
+
+      Source |       SS           df       MS      Number of obs   =        65
+-------------+----------------------------------   F(13, 51)       =   1445.54
+       Model |  2.8051e+09        13   215774437   Prob > F        =    0.0000
+    Residual |  7612707.12        51  149268.767   R-squared       =    0.9973
+-------------+----------------------------------   Adj R-squared   =    0.9966
+       Total |  2.8127e+09        64  43948131.2   Root MSE        =    386.35
+
+-------------------------------------------------------------------------------
+    Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+--------------+----------------------------------------------------------------
+  Scholarship |   8.395973   1.472441     5.70   0.000     5.439925    11.35202
+ _IDISTRICT_2 |  -73.00099   244.3525    -0.30   0.766    -563.5592    417.5572
+ _IDISTRICT_3 |   776.3151   244.4136     3.18   0.003     285.6344    1266.996
+ _IDISTRICT_4 |    -3.5431    244.352    -0.01   0.988    -494.1002     487.014
+ _IDISTRICT_5 |   18195.12   271.1103    67.11   0.000     17650.84     18739.4
+ _IDISTRICT_6 |   2356.915   244.3718     9.64   0.000     1866.318    2847.512
+ _IDISTRICT_7 |   1592.979   244.4064     6.52   0.000     1102.313    2083.645
+ _IDISTRICT_8 |   242.4176   244.3539     0.99   0.326    -248.1434    732.9785
+ _IDISTRICT_9 |   2292.615   244.7376     9.37   0.000     1801.284    2783.946
+_IDISTRICT_10 |  -192.6491   244.3515    -0.79   0.434    -683.2053    297.9071
+_IDISTRICT_11 |  -113.2566   244.3513    -0.46   0.645    -603.8124    377.2991
+_IDISTRICT_12 |   17358.85   325.0101    53.41   0.000     16706.37    18011.34
+_IDISTRICT_13 |    540.381   244.3543     2.21   0.032     49.81925    1030.943
+        _cons |   291.8965    172.783     1.69   0.097    -54.97993    638.7729
+-------------------------------------------------------------------------------
+
+.  estimates store ols_dum
+
+.  estimates table ols ols_dum, star stats(N)
+
+----------------------------------------------
+    Variable |      ols           ols_dum     
+-------------+--------------------------------
+ Scholarship |  95.407942***    8.3959727***  
+_IDISTRICT_2 |                 -73.000993     
+_IDISTRICT_3 |                   776.3151**   
+_IDISTRICT_4 |                 -3.5431005     
+_IDISTRICT_5 |                   18195.12***  
+_IDISTRICT_6 |                  2356.9151***  
+_IDISTRICT_7 |                   1592.979***  
+_IDISTRICT_8 |                  242.41756     
+_IDISTRICT_9 |                  2292.6152***  
+_IDISTRIC~10 |                 -192.64913     
+_IDISTRIC~11 |                 -113.25664     
+_IDISTRIC~12 |                   17358.85***  
+_IDISTRIC~13 |                  540.38097*    
+       _cons |  1921.4984**      291.8965     
+-------------+--------------------------------
+           N |         65              65     
+----------------------------------------------
+      legend: * p<0.05; ** p<0.01; *** p<0.001
+
+.  
+.   xtreg Enrolment Scholarship , fe
+
+Fixed-effects (within) regression               Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                F(1,51)           =      32.51
+corr(u_i, Xb)  = 0.7427                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   8.395973   1.472441     5.70   0.000     5.439925    11.35202
+       _cons |   3597.523   55.68531    64.60   0.000      3485.73    3709.316
+-------------+----------------------------------------------------------------
+     sigma_u |  6485.2163
+     sigma_e |  386.35316
+         rho |  .99646344   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 51) = 631.70                    Prob > F = 0.0000
+
+.   estimate store fixed
+
+.   areg Enrolment Scholarship ,absorb(DISTRICT)
+
+Linear regression, absorbing indicators         Number of obs     =         65
+                                                F(   1,     51)   =      32.51
+                                                Prob > F          =     0.0000
+                                                R-squared         =     0.9973
+                                                Adj R-squared     =     0.9966
+                                                Root MSE          =   386.3532
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   8.395973   1.472441     5.70   0.000     5.439925    11.35202
+       _cons |   3597.523   55.68531    64.60   0.000      3485.73    3709.316
+-------------+----------------------------------------------------------------
+    DISTRICT |         F(12, 51) =    631.705   0.000          (13 categories)
+
+.   
+.   xtreg Enrolment Scholarship ,re
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                Wald chi2(1)      =      19.11
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.663665   2.210827     4.37   0.000     5.330524    13.99681
+       _cons |   3573.105   975.0548     3.66   0.000     1662.032    5484.177
+-------------+----------------------------------------------------------------
+     sigma_u |  2322.1069
+     sigma_e |  386.35316
+         rho |  .97306322   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.   estimate store random
+
+.   xtreg Enrolment Scholarship Altitude  ,re
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.4953                                         avg =        5.0
+     overall = 0.4948                                         max =          5
+
+                                                Wald chi2(2)      =      49.69
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.087379    1.88391     4.82   0.000     5.394984    12.77977
+    Altitude |  -6.927004   1.429415    -4.85   0.000    -9.728607   -4.125401
+       _cons |   12188.61   1966.814     6.20   0.000     8333.724    16043.49
+-------------+----------------------------------------------------------------
+     sigma_u |  2356.5251
+     sigma_e |  386.35316
+         rho |  .97382388   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.   estimate store random1
+
+.   
+.   hausman fixed random
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |     fixed        random       Difference          S.E.
+-------------+----------------------------------------------------------------
+ Scholarship |    8.395973     9.663665       -1.267692               .
+------------------------------------------------------------------------------
+                           b = consistent under Ho and Ha; obtained from xtreg
+            B = inconsistent under Ha, efficient under Ho; obtained from xtreg
+
+    Test:  Ho:  difference in coefficients not systematic
+
+                  chi2(1) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+                          =    -0.59    chi2<0 ==> model fitted on these
+                                        data fails to meet the asymptotic
+                                        assumptions of the Hausman test;
+                                        see suest for a generalized test
+
+.   hausman fixed random1
+
+                 ---- Coefficients ----
+             |      (b)          (B)            (b-B)     sqrt(diag(V_b-V_B))
+             |     fixed       random1       Difference          S.E.
+-------------+----------------------------------------------------------------
+ Scholarship |    8.395973     9.087379       -.6914067               .
+------------------------------------------------------------------------------
+                           b = consistent under Ho and Ha; obtained from xtreg
+            B = inconsistent under Ha, efficient under Ho; obtained from xtreg
+
+    Test:  Ho:  difference in coefficients not systematic
+
+                  chi2(1) = (b-B)'[(V_b-V_B)^(-1)](b-B)
+                          =    -0.35    chi2<0 ==> model fitted on these
+                                        data fails to meet the asymptotic
+                                        assumptions of the Hausman test;
+                                        see suest for a generalized test
+
+. 
+.   xtreg Enrolment Scholarship ,re
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                Wald chi2(1)      =      19.11
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.663665   2.210827     4.37   0.000     5.330524    13.99681
+       _cons |   3573.105   975.0548     3.66   0.000     1662.032    5484.177
+-------------+----------------------------------------------------------------
+     sigma_u |  2322.1069
+     sigma_e |  386.35316
+         rho |  .97306322   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.   xttest0
+
+Breusch and Pagan Lagrangian multiplier test for random effects
+
+        Enrolment[DISTRICT1,t] = Xb + u[DISTRICT1] + e[DISTRICT1,t]
+
+        Estimated results:
+                         |       Var     sd = sqrt(Var)
+                ---------+-----------------------------
+               Enrolment |   4.39e+07       6629.339
+                       e |   149268.8       386.3532
+                       u |    5392180       2322.107
+
+        Test:   Var(u) = 0
+                             chibar2(01) =    22.89
+                          Prob > chibar2 =   0.0000
+
+.   xtreg Enrolment Scholarship Altitude  ,re
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.4953                                         avg =        5.0
+     overall = 0.4948                                         max =          5
+
+                                                Wald chi2(2)      =      49.69
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.087379    1.88391     4.82   0.000     5.394984    12.77977
+    Altitude |  -6.927004   1.429415    -4.85   0.000    -9.728607   -4.125401
+       _cons |   12188.61   1966.814     6.20   0.000     8333.724    16043.49
+-------------+----------------------------------------------------------------
+     sigma_u |  2356.5251
+     sigma_e |  386.35316
+         rho |  .97382388   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.   xttest0
+
+Breusch and Pagan Lagrangian multiplier test for random effects
+
+        Enrolment[DISTRICT1,t] = Xb + u[DISTRICT1] + e[DISTRICT1,t]
+
+        Estimated results:
+                         |       Var     sd = sqrt(Var)
+                ---------+-----------------------------
+               Enrolment |   4.39e+07       6629.339
+                       e |   149268.8       386.3532
+                       u |    5553211       2356.525
+
+        Test:   Var(u) = 0
+                             chibar2(01) =    42.28
+                          Prob > chibar2 =   0.0000
+
+.   
+.   
+.    xtreg Enrolment Scholarship , fe
+
+Fixed-effects (within) regression               Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                F(1,51)           =      32.51
+corr(u_i, Xb)  = 0.7427                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   8.395973   1.472441     5.70   0.000     5.439925    11.35202
+       _cons |   3597.523   55.68531    64.60   0.000      3485.73    3709.316
+-------------+----------------------------------------------------------------
+     sigma_u |  6485.2163
+     sigma_e |  386.35316
+         rho |  .99646344   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 51) = 631.70                    Prob > F = 0.0000
+
+.    *xttest2 singular residuals
+.    
+.    xtreg Enrolment Scholarship , fe
+
+Fixed-effects (within) regression               Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                F(1,51)           =      32.51
+corr(u_i, Xb)  = 0.7427                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   8.395973   1.472441     5.70   0.000     5.439925    11.35202
+       _cons |   3597.523   55.68531    64.60   0.000      3485.73    3709.316
+-------------+----------------------------------------------------------------
+     sigma_u |  6485.2163
+     sigma_e |  386.35316
+         rho |  .99646344   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 51) = 631.70                    Prob > F = 0.0000
+
+.     xtcsd, pesaran abs
+ 
+ 
+Pesaran's test of cross sectional independence =     1.957, Pr = 0.0503
+ 
+Average absolute value of the off-diagonal elements =     0.529
+
+.         
+. xtscc Enrolment Scholarship ,fe
+
+Regression with Driscoll-Kraay standard errors   Number of obs     =        65
+Method: Fixed-effects regression                 Number of groups  =        13
+Group variable (i): DISTRICT1                    F(  1,     4)     =     14.94
+maximum lag: 2                                   Prob > F          =    0.0181
+                                                 within R-squared  =    0.3893
+
+------------------------------------------------------------------------------
+             |             Drisc/Kraay
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   8.395973   2.172006     3.87   0.018     2.365517    14.42643
+       _cons |   3597.523   72.84481    49.39   0.000     3395.273    3799.773
+------------------------------------------------------------------------------
+
+
+. xtscc Enrolment Scholarship ,re
+
+Regression with Driscoll-Kraay standard errors   Number of obs     =        65
+Method: Random-effects GLS regression            Number of groups  =        13
+Group variable (i): DISTRICT1                    Wald chi2(1)      =      1.87
+maximum lag: 2                                   Prob > chi2       =    0.1715
+corr(u_i, Xb) = 0 (assumed)                      overall R-squared =    0.5950
+
+------------------------------------------------------------------------------
+             |             Drisc/Kraay
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.663665   7.067365     1.37   0.243    -9.958487    29.28582
+       _cons |   3573.105   630.4379     5.67   0.005     1822.728    5323.481
+-------------+----------------------------------------------------------------
+     sigma_u |  2322.1069
+     sigma_e |  386.35316
+         rho |  .97306322   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+
+. 
+. xtscc Enrolment Scholarship Altitude  ,re
+
+Regression with Driscoll-Kraay standard errors   Number of obs     =        65
+Method: Random-effects GLS regression            Number of groups  =        13
+Group variable (i): DISTRICT1                    Wald chi2(1)      =     11.55
+maximum lag: 2                                   Prob > chi2       =    0.0007
+corr(u_i, Xb) = 0 (assumed)                      overall R-squared =    0.4948
+
+------------------------------------------------------------------------------
+             |             Drisc/Kraay
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.087379   4.317925     2.10   0.103    -2.901103    21.07586
+    Altitude |  -6.927004   1.502171    -4.61   0.010     -11.0977   -2.756308
+       _cons |   12188.61   2586.002     4.71   0.009     5008.717     19368.5
+-------------+----------------------------------------------------------------
+     sigma_u |  2356.5251
+     sigma_e |  386.35316
+         rho |  .97382388   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+
+.           
+.   xtreg Enrolment Scholarship i.YEAR ,fe
+
+Fixed-effects (within) regression               Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.4962                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5161                                         max =          5
+
+                                                F(5,47)           =       9.26
+corr(u_i, Xb)  = 0.6836                         Prob > F          =     0.0000
+
+------------------------------------------------------------------------------
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   7.779051   1.517952     5.12   0.000     4.725326    10.83278
+             |
+        YEAR |
+       2014  |  -215.6576   143.3954    -1.50   0.139    -504.1319    72.81681
+       2015  |  -227.1552   143.4894    -1.58   0.120    -515.8187     61.5083
+       2016  |  -155.0791   149.4592    -1.04   0.305    -455.7523    145.5941
+       2017  |  -448.9349   146.6366    -3.06   0.004    -743.9297     -153.94
+             |
+       _cons |   3818.771   109.8171    34.77   0.000     3597.848    4039.695
+-------------+----------------------------------------------------------------
+     sigma_u |  6510.5859
+     sigma_e |  365.53703
+         rho |  .99685764   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+F test that all u_i=0: F(12, 47) = 655.34                    Prob > F = 0.0000
+
+.         testparm i.YEAR
+
+ ( 1)  2014.YEAR = 0
+ ( 2)  2015.YEAR = 0
+ ( 3)  2016.YEAR = 0
+ ( 4)  2017.YEAR = 0
+
+       F(  4,    47) =    2.49
+            Prob > F =    0.0555
+
+.         
+.         xtscc Enrolment Scholarship i.YEAR ,fe
+
+Regression with Driscoll-Kraay standard errors   Number of obs     =        65
+Method: Fixed-effects regression                 Number of groups  =        13
+Group variable (i): DISTRICT1                    F(  5,     4)     =      8.30
+maximum lag: 2                                   Prob > F          =    0.0309
+                                                 within R-squared  =    0.4962
+
+------------------------------------------------------------------------------
+             |             Drisc/Kraay
+   Enrolment |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   7.779051   1.935414     4.02   0.016      2.40548    13.15262
+             |
+        YEAR |
+       2013  |          0  (empty)
+       2014  |  -215.6576   3.053488   -70.63   0.000    -224.1354   -207.1797
+       2015  |  -227.1552   7.292044   -31.15   0.000    -247.4012   -206.9093
+       2016  |  -155.0791   53.81642    -2.88   0.045    -304.4975   -5.660797
+       2017  |  -448.9349   39.21149   -11.45   0.000    -557.8034   -340.0663
+             |
+       _cons |   3818.771   53.81642    70.96   0.000     3669.353     3968.19
+------------------------------------------------------------------------------
+
+
+. 
+.         xtreg Enrolment Scholarship ,re robust
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.8935                                         avg =        5.0
+     overall = 0.5950                                         max =          5
+
+                                                Wald chi2(1)      =     484.94
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+                             (Std. Err. adjusted for 13 clusters in DISTRICT1)
+------------------------------------------------------------------------------
+             |               Robust
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.663665   .4388296    22.02   0.000     8.803575    10.52376
+       _cons |   3573.105    1802.44     1.98   0.047     40.38724    7105.822
+-------------+----------------------------------------------------------------
+     sigma_u |  2322.1069
+     sigma_e |  386.35316
+         rho |  .97306322   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+.         xtreg Enrolment Scholarship Altitude,re robust
+
+Random-effects GLS regression                   Number of obs     =         65
+Group variable: DISTRICT1                       Number of groups  =         13
+
+R-sq:                                           Obs per group:
+     within  = 0.3893                                         min =          5
+     between = 0.4953                                         avg =        5.0
+     overall = 0.4948                                         max =          5
+
+                                                Wald chi2(2)      =     395.92
+corr(u_i, X)   = 0 (assumed)                    Prob > chi2       =     0.0000
+
+                             (Std. Err. adjusted for 13 clusters in DISTRICT1)
+------------------------------------------------------------------------------
+             |               Robust
+   Enrolment |      Coef.   Std. Err.      z    P>|z|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+ Scholarship |   9.087379   .6565973    13.84   0.000     7.800472    10.37429
+    Altitude |  -6.927004   3.073949    -2.25   0.024    -12.95183   -.9021747
+       _cons |   12188.61   4975.068     2.45   0.014     2437.655    21939.56
+-------------+----------------------------------------------------------------
+     sigma_u |  2356.5251
+     sigma_e |  386.35316
+         rho |  .97382388   (fraction of variance due to u_i)
+------------------------------------------------------------------------------
+
+. 
+. 
+. 
+. 
+. 
+. 
+. 
+end of do-file
+
+. graph use "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST.gph"
+
+. graph use "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_ols.gph"
+
+. graph use "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_het_dist.gph"
+
+. graph save Enrolment_ST_het_dist "/Users/abhishekchand/tmp/fixedrandom/Enrolment
+> _ST_het_dist.gph", replace
+(file /Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_het_dist.gph saved)
+graph save Enrolment_ST_ols "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_ols
+> .gph", replace
+(file /Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_ols.gph saved)
+graph save Enrolment_ST "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST.gph", r
+> eplace
+(file /Users/abhishekchand/tmp/fixedrandom/Enrolment_ST.gph saved)
+graph save Graph "/Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_het_year.gph",
+>  replace
+(file /Users/abhishekchand/tmp/fixedrandom/Enrolment_ST_het_year.gph saved)
