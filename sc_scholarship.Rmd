@@ -1,0 +1,35 @@
+---
+atitle: "SC_Sholarship"
+author: "ac23"
+date: "13/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## SC Sholarship
+
+```{r , echo=FALSE}
+
+library(foreign)
+library(car)
+library(readxl)
+library(ggplot2)
+library(gplots)
+df = read_excel("scho_data.xlsx", col_names = TRUE)
+```
+
+```{r}
+summary(df)
+```
+
+```{r}
+coplot(Enrolment ~ YEAR|DISTRICT , type ="b", data=df)
+```
+
+```{r}
+plotmeans(Enrolment ~ DISTRICT, main="Heterogeineity across Districts", data=df, bars=TRUE )
+
+```
